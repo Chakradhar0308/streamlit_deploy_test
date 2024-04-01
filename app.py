@@ -2,6 +2,7 @@ import altair as alt
 import pandas as pd
 import seaborn as sns
 import streamlit as st
+import time
 
 st.title("Palmer's Penguins")
 st.markdown("Use this Streamlit app to make your own scatterplot about penguins!")
@@ -14,10 +15,18 @@ selected_y_var = st.selectbox(
     ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"],
 )
 penguin_file = st.file_uploader('Select Your Local Penguins CSV')
-if penguin_file is not None:
-    penguins_df = pd.read_csv(penguin_file)
-else:
-    st.stop()
+
+@st.cache
+def load_file(penguin_file):
+    time.sleep(5)  # Simulate a time-consuming operation, such as loading data
+    if penguin_file is not None:
+        penguins_df = pd.read_csv(penguin_file)
+    else:
+        # Assuming 'penguins.csv' is a fallback file present in your app's directory
+        penguins_df = pd.read_csv('penguins.csv')
+    return penguins_df
+
+penguins_df = load_file(penguin_file)
 
 sns.set_style('darkgrid')
 markers = {"Adelie": "X", "Gentoo": "s", "Chinstrap": 'o'}
@@ -28,7 +37,7 @@ alt_chart = (
     .encode(
         x=selected_x_var,
         y=selected_y_var,
-        color="species",  # color is given for the column we want to color code on the graph from the dataset we are uploading
+        color="species",  # Color is given for the column we want to color code on the graph from the dataset we are uploading
     )
     .interactive()
 )
